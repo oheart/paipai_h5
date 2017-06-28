@@ -8,6 +8,7 @@ $(document).ready(function () {
     var imgArray;            //保存图片地址
     var descList;
     var timer = null;
+    var secondTimer = null;
     var playStatus = true;
     var distance = {}; //用于记住手势距离
     var imgScale = 1;  //用于保存缩放值
@@ -27,7 +28,7 @@ $(document).ready(function () {
     var mStartY;
     var currentLeft = 0;
     var currentTop = 0;
-    var miusicPlay = false;
+    var musicPlay = false;
 
     function isEmpty(obj){
 
@@ -111,12 +112,12 @@ $(document).ready(function () {
 
             if(ifAutoPlayFlag){
 
-                $('.swx-pic-play').attr('src','/paipai_h5/img/play.png');
+                $('.swx-pic-play').attr('src','/sanweixiu/img/play.png');
                 startMove();
 
             }else{
 
-                $('.swx-pic-play').attr('src','/paipai_h5/img/pause_play.png');
+                $('.swx-pic-play').attr('src','/sanweixiu/img/pause_play.png');
                 stopMove();
 
             }
@@ -125,11 +126,13 @@ $(document).ready(function () {
 
             if(ifAutoPlayFlag){
 
-                $('.swx-pic-play').attr('src','/paipai_h5/img/play.png');
+                $('.swx-pic-play').attr('src','/sanweixiu/img/play.png');
+                limitFlagPlay();
 
             }else{
 
-                $('.swx-pic-play').attr('src','/paipai_h5/img/pause_play.png');
+                $('.swx-pic-play').attr('src','/sanweixiu/img/pause_play.png');
+                limitFlagStop();
 
             }
 
@@ -180,7 +183,7 @@ $(document).ready(function () {
             hintCon.style.marginBottom = '5px';
             hintTxt.innerHTML = '可手动放大缩小';
             $(hintImg).removeClass('left-right-icon');
-            hintImg.src = '/paipai_h5/img/magnify_icon.png';
+            hintImg.src = '/sanweixiu/img/magnify_icon.png';
         },2000);
         setTimeout(function(){
             hintLayer.remove();
@@ -206,7 +209,6 @@ $(document).ready(function () {
 
             (currentTop <= maxPosition) ? currentTop = maxPosition
                 : (currentTop > -maxPosition) ? currentTop = -maxPosition : void 0;
-
 
         }else{
 
@@ -271,7 +273,7 @@ $(document).ready(function () {
 
         jsonData.title != null ? $(".goods_name").html(jsonData.title) : void 0;
         jsonData.desc != null ? $(".goods_item_desc").text(jsonData.desc) : void 0;
-        jsonData.price != null ? $(".goods_buy_left_1").text("即刻限时特价：￥"+ jsonData.price  + ".00") : void 0;
+        jsonData.price != null ? $(".goods_buy_left_1").text("即刻限时特价：￥"+ toThousands(jsonData.price)  + ".00") : void 0;
         jsonData.saleCount != null ? $(".goods_buy_left_2").text("销量: "+jsonData.saleCount) : void 0;
         jsonData.likeCount != null ? $(".item_like").text(jsonData.likeCount) : void 0;
         jsonData.userName != null ? $(".user_name").text(jsonData.userName) : void 0;
@@ -364,6 +366,7 @@ $(document).ready(function () {
 
                         product1.appendChild(oImg);
                         allImg[iCount] = oImg;
+
                         if(++iLoaded == iImgCount){
                             onLoadAll();
                         }
@@ -412,7 +415,7 @@ $(document).ready(function () {
 
                                 doubleTouch = true;
                                 ifAutoPlayFlag = false;
-                                checkStatus();
+                                checkStatus("imgTouchStart");
 
                             }
 
@@ -506,9 +509,7 @@ $(document).ready(function () {
 
                 imgScale = 1;
                 stopMove();
-                ifAutoPlayFlag = true;
-                checkStatus();
-
+                limitFlagStop();
                 $(".previous-image").css({
 
                     "webkit-transform":"scale( 1 )",
@@ -517,6 +518,8 @@ $(document).ready(function () {
 
                 });
                 limitFlag = !limitFlag;
+                ifAutoPlayFlag = true;
+                checkStatus();
                 imgArray = [];
                 chooseProd();
 
@@ -531,7 +534,7 @@ $(document).ready(function () {
 
                     }
 
-                    $('.swx-hot-spots').attr('src','/paipai_h5/img/hot_on.png');
+                    $('.swx-hot-spots').attr('src','/sanweixiu/img/hot_on.png');
 
                     //旋转图片跟随简介-热点
                     if (!isEmpty(jsonData.hotPicTags)){
@@ -562,10 +565,10 @@ $(document).ready(function () {
 
                     product2.innerHTML = imgHtml;
                     $(".img_desc2").html(descList[curImgIndex]);
+                    limitFlagStop();
+                    limitFlagPlay();
 
                 }else{
-
-                    checkStatus();
 
                     for (var i = 0; i < jsonData.picUrls.length; i++) {
 
@@ -575,7 +578,7 @@ $(document).ready(function () {
                     }
 
                     imgFollowDisc(jsonData.picTags,"img_desc1");
-                    $('.swx-hot-spots').attr('src','/paipai_h5/img/hot_off.png');
+                    $('.swx-hot-spots').attr('src','/sanweixiu/img/hot_off.png');
 
                 }
 
@@ -651,17 +654,17 @@ $(document).ready(function () {
 
     function tapMusicIcon(){
 
-        miusicPlay = !miusicPlay;
+        musicPlay = !musicPlay;
 
-        if(miusicPlay){
+        if(musicPlay){
 
-            $('.swx-music').attr('src','/paipai_h5/img/music.png');
+            $('.swx-music').attr('src','/sanweixiu/img/music.png');
             $('.swx-music').removeClass('music-pause');
             myAuto.play();
 
         }else{
 
-            $('.swx-music').attr('src','/paipai_h5/img/music_pause.png');
+            $('.swx-music').attr('src','/sanweixiu/img/music_pause.png');
             $('.swx-music').addClass('music-pause');
 
             myAuto.pause();
@@ -677,17 +680,17 @@ $(document).ready(function () {
         if(ifOpenBarrageFlag){
 
             $('.zpg-barrage-container').show();
-            $('.swx-barrage').attr('src','/paipai_h5/img/barrage_open.png');
+            $('.swx-barrage').attr('src','/sanweixiu/img/barrage_open.png');
 
         }else{
             $('.zpg-barrage-container').hide();
-            $('.swx-barrage').attr('src','/paipai_h5/img/barrage.png');
+            $('.swx-barrage').attr('src','/sanweixiu/img/barrage.png');
 
         }
     }
 
     //千分位
-  /*  function toThousands(num) {
+    function toThousands(num) {
 
         var result = [ ], counter = 0;
         num = (num || 0).toString().split('');
@@ -702,7 +705,7 @@ $(document).ready(function () {
 
         return result.join('');
 
-    }*/
+    }
 
 
     //滑动
@@ -741,6 +744,40 @@ $(document).ready(function () {
 
     }
 
+    //自动切换热点图
+    function limitFlagPlay(){
+
+        secondTimer = setInterval(function(){
+
+            var oDiv = $("div.slideImgDiv");
+
+            curImgIndex = curImgIndex + 1;
+            showOneHideAll(oDiv,curImgIndex,"slideImgDiv");
+
+            if(curImgIndex == imgArray.length){
+
+                curImgIndex = 0;
+
+            }
+
+            oDiv[curImgIndex].style.webkitTransform = "translateX(0,0)";
+            oDiv[curImgIndex].className = "slideImgDiv zIndex";
+            oDiv[curImgIndex].style.display = "block";
+            $(".img_desc2").html(descList[curImgIndex]);
+
+        },1500);
+
+
+    }
+
+    //停止切换热点图
+    function limitFlagStop(){
+
+        clearInterval(secondTimer);
+        secondTimer = null;
+
+    }
+
     function oLisTouchStart(ev) {
 
         if(ev.touches.length >= 2){
@@ -769,7 +806,9 @@ $(document).ready(function () {
 
             if($(ev.target).attr("curImgIndex")){
 
-                curImgIndex = $(ev.target).attr("curImgIndex");
+                curImgIndex = parseInt($(ev.target).attr("curImgIndex"));
+
+                limitFlagStop();
 
             }
 
@@ -844,18 +883,18 @@ $(document).ready(function () {
 
         }else{
 
-            if($(ev.target).attr("curImgIndex") && !doubleTouch && ev.touches.length == 1){
+            if($(ev.target).attr("curImgIndex")){
 
-                var oDiv = $("div.slideImgDiv");
-                curImgIndex = parseInt($(ev.target).attr("curImgIndex"));//当前图的索引
+                if(!doubleTouch && ev.touches.length == 1 && ifAutoPlayFlag){
 
-                if(ifAutoPlayFlag){
+                    var oDiv = $("div.slideImgDiv");
+                    curImgIndex = parseInt($(ev.target).attr("curImgIndex"));//当前图的索引
 
                     if(Math.abs(changeX) > Math.abs(changeY)){
 
-                        this.flag = false;  //横滑不改变
+                        this.flag = false;
 
-                        if(Math.abs(changeX) - Math.abs(changeY) >= 50 && (ev.touches.length < 2)){
+                        if(ev.touches.length < 2){
 
                             //小于0说明是向左滑，图片递增
                             if(changeX < 0){
@@ -902,12 +941,16 @@ $(document).ready(function () {
 
                 }else{
 
-                    moveImg(ev);
+                    if(!ifAutoPlayFlag && ev.touches.length == 1){
+
+                        moveImg(ev);
+
+                    }
 
                 }
 
-
             }
+
 
             if (ev.touches.length === 2 && doubleTouch) {
 
@@ -978,6 +1021,13 @@ $(document).ready(function () {
             doubleTouch = false;
 
         }
+
+        if($(ev.target).attr("curImgIndex")){
+
+            if(ifAutoPlayFlag){limitFlagPlay();}
+
+        }
+
 
     }
 

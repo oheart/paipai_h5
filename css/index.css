@@ -162,6 +162,7 @@ a {
     height: 3.6rem!important;
     overflow: hidden;
     position: relative;
+    background: #000;
 }
 .img_360_box img{
     width: 100%;
